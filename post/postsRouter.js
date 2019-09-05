@@ -14,6 +14,32 @@ router.get("/", (req, res) => {
     });
 });
 
+router.post("/", (req, res) => {
+  const { title, contents } = req.body;
+  if (!title || !contents) {
+    return res.status(400).json({
+      errorMessage: "Please provide title and contents for the post."
+    });
+  }
+  db.insert({ title, contents })
+    .then(({ id }) => {
+      db.findById(id)
+        .then(([post]) => {
+          res.status(201).json(post);
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({ error: "Error finding the post" });
+        });
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json({
+        error: "There was an error while saving the post to the database"
+      });
+    });
+});
+
 router.get("/:id", (req, res) => {
   const { id } = req.params;
   db.findById(id)
@@ -37,7 +63,5 @@ router.get("/:id", (req, res) => {
         .json({ error: "The posts information could not be retrieved." });
     });
 });
-
-router.get;
 
 module.exports = router;
