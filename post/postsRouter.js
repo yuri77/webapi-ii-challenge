@@ -64,4 +64,33 @@ router.get("/:id", (req, res) => {
     });
 });
 
+//put not responding to id that doesn't exist
+router.put("/:id", (req, res) => {
+  const { id } = req.params;
+  console.log(req.body);
+  const { title, contents } = req.body;
+  if (!title || !contents) {
+    return res.status(400).json({
+      errorMessage: "Please provide title and contents for the post."
+    });
+  }
+  db.update(id, { title, contents })
+    .then(({ id }) => {
+      db.findById(id)
+        .then(([post]) => {
+          res.status(201).json(post);
+        })
+        .catch(err => {
+          console.log(err);
+          res.status(500).json({ error: "Error finding the post" });
+        });
+    })
+    .catch(err => {
+      err => console.log(err);
+      res
+        .status(500)
+        .json({ error: "The post information could not be modified." });
+    });
+});
+
 module.exports = router;
